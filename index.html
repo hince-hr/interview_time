@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>비바웨이브 면접 일정 선택</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS 변수 — 운영자가 브랜드 색상 변경 시 여기만 수정
+       ============================================================ */
+    :root {
+      --primary:         #A26965;
+      --primary-hover:   #8C5753;
+      --primary-light:   #F4E8E6;
+      --background:      #FAF8F7;
+      --card-bg:         #FFFFFF;
+      --text-primary:    #2B2B2B;
+      --text-secondary:  #6B6B6B;
+      --border:          #E5E5E5;
+      --success:         #2E7D32;
+      --success-light:   #E8F5E9;
+      --error:           #C62828;
+      --error-light:     #FFEBEE;
+      --radius:          12px;
+      --radius-sm:       8px;
+      --shadow:          0 2px 16px rgba(162,105,101,0.08);
+      --shadow-hover:    0 8px 32px rgba(162,105,101,0.16);
+      --transition:      0.2s ease;
+    }
+
+    /* ============================================================
+       Reset & Base
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--background);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ============================================================
+       Top Bar — 항상 노출
+       ============================================================ */
+    .top-bar {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .top-bar-brand {
+      font-family: 'Noto Serif KR', serif;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--primary);
+      letter-spacing: 0.02em;
+    }
+    .top-bar-contact {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .top-bar-contact a { font-weight: 500; }
+
+    /* ============================================================
+       Layout
+       ============================================================ */
+    .page-wrapper {
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    /* ============================================================
+       Notice Banner
+       ============================================================ */
+    .notice-banner {
+      background: var(--primary-light);
+      border: 1px solid rgba(162,105,101,0.2);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+    .notice-banner strong {
+      display: block;
+      font-size: 15px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    /* ============================================================
+       Card
+       ============================================================ */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       Form Elements
+       ============================================================ */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 7px;
+      letter-spacing: 0.03em;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--text-primary);
+      background: var(--background);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(162,105,101,0.12);
+    }
+    .form-input::placeholder { color: #bbb; }
+
+    /* ============================================================
+       Buttons
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      width: 100%;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ============================================================
+       Candidate Info
+       ============================================================ */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 400px) {
+      .info-grid { grid-template-columns: 1fr; }
+    }
+    .info-item {}
+    .info-item-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .info-item-value {
+      font-size: 15px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       Deadline Badge
+       ============================================================ */
+    .deadline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+    .deadline-badge.urgent { background: var(--error-light); color: var(--error); }
+
+    /* ============================================================
+       Slot Cards
+       ============================================================ */
+    .slots-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .slot-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition), transform var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      user-select: none;
+    }
+    .slot-card:hover:not(.disabled):not(.selected) {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+    }
+    .slot-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: var(--shadow);
+    }
+    .slot-card.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .slot-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+    .slot-card.selected .slot-icon { background: var(--primary); }
+
+    .slot-info { flex: 1; }
+    .slot-date {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .slot-time {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .slot-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+    .slot-card.selected .slot-check {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .slot-check svg { width: 12px; height: 12px; opacity: 0; }
+    .slot-card.selected .slot-check svg { opacity: 1; }
+
+    /* 가능한 일정 없음 버튼 */
+    .btn-no-slot {
+      width: 100%;
+      padding: 14px;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+      margin-top: 8px;
+    }
+    .btn-no-slot:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+    .btn-no-slot:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ============================================================
+       Status Messages
+       ============================================================ */
+    .msg {
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 14px;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    .msg-error { background: var(--error-light); color: var(--error); border: 1px solid rgba(198,40,40,0.15); }
+    .msg-success { background: var(--success-light); color: var(--success); border: 1px solid rgba(46,125,50,0.15); }
+    .msg-info { background: var(--primary-light); color: var(--primary); border: 1px solid rgba(162,105,101,0.2); }
+
+    /* ============================================================
+       Completion Screen
+       ============================================================ */
+    .complete-screen { text-align: center; padding: 48px 40px; }
+    @media (max-width: 480px) { .complete-screen { padding: 32px 20px; } }
+
+    .complete-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--success-light);
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .complete-icon svg { color: var(--success); }
+
+    .complete-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .complete-slot {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-light);
+      border-radius: var(--radius-sm);
+      padding: 14px 24px;
+      display: inline-block;
+      margin: 16px 0;
+    }
+    .complete-note {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      line-height: 1.7;
+    }
+
+    /* no-slot complete */
+    .no-slot-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    /* ============================================================
+       Expired Screen
+       ============================================================ */
+    .expired-screen { text-align: center; padding: 48px 40px; }
+    .expired-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .expired-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    .expired-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ============================================================
+       Loading Spinner
+       ============================================================ */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Section divider */
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* Footer */
+    .page-footer {
+      text-align: center;
+      font-size: 12px;
+      color: #bbb;
+      margin-top: 48px;
+    }
+
+    /* Hidden */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR (항상 노출)
+     ============================================================ -->
+<header class="top-bar">
+  <span class="top-bar-brand">Vivawave · 비바웨이브</span>
+  <span class="top-bar-contact">
+    문의: <a href="mailto:hr@vivawave.co.kr">hr@vivawave.co.kr</a>
+  </span>
+</header>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main class="page-wrapper">
+
+  <!-- Notice Banner -->
+  <div class="notice-banner" id="noticeBanner">
+    <strong>면접 일정 선택 안내</strong>
+    안녕하세요. 비바웨이브 면접 일정 선택 페이지입니다.<br>
+    가능한 일정 중 1개를 선택해 주세요.<br>
+    선택 완료 후 일정은 즉시 확정됩니다.<br>
+    변경이 필요한 경우 <a href="mailto:hr@vivawave.co.kr">hr@vivawave.co.kr</a>로 문의 바랍니다.<br>
+    <strong style="color:var(--primary);font-family:'Noto Serif KR',serif;margin-top:6px;display:block;">선택은 기한 내에만 가능합니다.</strong>
+  </div>
+
+  <!-- ============================================================
+       STEP 1: 본인 인증
+       ============================================================ -->
+  <section class="card" id="authSection">
+    <h2 class="card-title">본인 확인</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="inputName">이름</label>
+      <input
+        class="form-input"
+        id="inputName"
+        type="text"
+        placeholder="홍길동"
+        autocomplete="name"
+        maxlength="30"
+      />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inputPhone">전화번호</label>
+      <input
+        class="form-input"
+        id="inputPhone"
+        type="tel"
+        placeholder="010-1234-5678"
+        autocomplete="tel"
+        maxlength="15"
+      />
+    </div>
+
+    <div id="authError" class="msg msg-error hidden"></div>
+
+    <button class="btn btn-primary" id="authBtn" onclick="handleAuth()">
+      확인
+    </button>
+  </section>
+
+  <!-- ============================================================
+       STEP 2: 후보자 정보 + 일정 선택
+       ============================================================ -->
+  <section class="card hidden" id="scheduleSection">
+    <!-- 후보자 정보 -->
+    <div style="margin-bottom:28px;">
+      <p class="section-label">지원자 정보</p>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-item-label">지원 포지션</div>
+          <div class="info-item-value" id="infoPosition">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">이름</div>
+          <div class="info-item-value" id="infoName">—</div>
+        </div>
+      </div>
+      <div id="deadlineBadge" class="deadline-badge">
+        📅 <span id="deadlineText">—</span>까지 선택 가능
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin-bottom:24px;" />
+
+    <!-- 일정 목록 -->
+    <p class="section-label">면접 가능 일정</p>
+    <div class="slots-list" id="slotsList">
+      <!-- JS로 동적 렌더링 -->
+    </div>
+
+    <!-- 가능한 일정 없음 -->
+    <button class="btn-no-slot" id="noSlotBtn" onclick="handleNoSlot()">
+      가능한 일정이 없어요
+    </button>
+
+    <div id="scheduleError" class="msg msg-error hidden"></div>
+  </section>
+
+  <!-- ============================================================
+       STEP 3-A: 완료 화면 (일정 선택)
+       ============================================================ -->
+  <section class="card hidden" id="completeSection">
+    <div class="complete-screen">
+      <div class="complete-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <p class="complete-title">
+        <span id="completePosition">—</span> 후보자<br>
+        <span id="completeName">—</span>님의 면접 일정이<br>확정되었습니다.
+      </p>
+      <div class="complete-slot" id="completeSlot">—</div>
+      <p class="complete-note">
+        일정 변경이 필요하신 경우<br>
+        <a href="mailto:hr@vivawave.co.kr">hr@vivawave.co.kr</a>로 문의해 주세요.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STEP 3-B: 완료 화면 (가능한 일정 없음)
+       ============================================================ -->
+  <section class="card hidden" id="noSlotSection">
+    <div class="complete-screen">
+      <div class="no-slot-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"
+          viewBox="0 0 24 24" stroke="var(--primary)" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <p class="complete-title">전달 완료</p>
+      <p style="font-size:15px;color:var(--text-secondary);line-height:1.7;">
+        가능한 일정이 없다고 전달되었습니다.<br>
+        담당자가 확인 후 별도로 연락드릴 예정입니다.
+      </p>
+      <p class="complete-note">
+        문의: <a href="mailto:hr@vivawave.co.kr">hr@vivawave.co.kr</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       만료 화면
+       ============================================================ -->
+  <section class="card hidden" id="expiredSection">
+    <div class="expired-screen">
+      <div class="expired-icon">⏰</div>
+      <p class="expired-title">선택 기한이 종료되었습니다.</p>
+      <p class="expired-sub">
+        일정 선택 기한이 마감되었습니다.<br>
+        <a href="mailto:hr@vivawave.co.kr">hr@vivawave.co.kr</a>로 문의 바랍니다.
+      </p>
+    </div>
+  </section>
+
+  <footer class="page-footer">
+    © 2025 Vivawave Co., Ltd. · Hince
+  </footer>
+</main>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+/* ================================================================
+   ★ 운영자 설정 영역 — 아래 값만 수정하세요
+   ================================================================ */
+const CONFIG = {
+  // Google Apps Script 웹앱 배포 URL
+  // ※ Apps Script 배포 후 여기에 붙여넣기
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec',
+};
+
+/* ================================================================
+   ★ 안내 문구 — 수정 가능
+   ================================================================ */
+const COPY = {
+  authErrorNotFound: '입력하신 정보와 일치하는 지원자를 찾을 수 없습니다.\n이름과 전화번호를 다시 확인해 주세요.',
+  contactEmail: 'hr@vivawave.co.kr',
+};
+
+/* ================================================================
+   아래는 건드리지 마세요
+   ================================================================ */
+
+// 상태 관리
+let state = {
+  sessionKey: null,
+  candidate: null,
+  slots: [],
+  isSubmitting: false,
+};
+
+/* ---------------------------------------------------------------
+   유틸리티
+--------------------------------------------------------------- */
+function show(id)  { document.getElementById(id).classList.remove('hidden'); }
+function hide(id)  { document.getElementById(id).classList.add('hidden'); }
+function $(id)     { return document.getElementById(id); }
+
+function setAuthError(msg) {
+  const el = $('authError');
+  if (msg) {
+    el.innerHTML = msg + `<br><a href="mailto:${COPY.contactEmail}" style="font-weight:600;">${COPY.contactEmail}</a>`;
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
+}
+
+function setScheduleError(msg) {
+  const el = $('scheduleError');
+  if (msg) {
+    el.innerHTML = msg;
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
+}
+
+function setAuthBtnLoading(loading) {
+  const btn = $('authBtn');
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<span class="spinner"></span> 확인 중...'
+    : '확인';
+}
+
+/* ---------------------------------------------------------------
+   날짜 포맷
+--------------------------------------------------------------- */
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+function formatDate(dateStr) {
+  // dateStr: "2026-04-15" 형태
+  const d = new Date(dateStr + 'T00:00:00');
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const wd = WEEKDAYS[d.getDay()];
+  return `${y}년 ${m}월 ${day}일 (${wd})`;
+}
+
+function isDeadlineUrgent(deadlineStr) {
+  // deadlineStr: "2026-04-15"
+  const now = new Date();
+  const deadline = new Date(deadlineStr + 'T23:59:59');
+  const diffDays = (deadline - now) / (1000 * 60 * 60 * 24);
+  return diffDays <= 2;
+}
+
+/* ---------------------------------------------------------------
+   STEP 1: 본인 인증
+--------------------------------------------------------------- */
+// Enter 키 지원
+['inputName', 'inputPhone'].forEach(id => {
+  $(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleAuth();
+  });
+});
+
+async function handleAuth() {
+  const name  = $('inputName').value.trim();
+  const phone = $('inputPhone').value.trim().replace(/-/g, '');
+
+  setAuthError('');
+
+  if (!name)  { setAuthError('이름을 입력해 주세요.'); return; }
+  if (!phone) { setAuthError('전화번호를 입력해 주세요.'); return; }
+  if (!/^\d{9,11}$/.test(phone)) {
+    setAuthError('전화번호 형식을 확인해 주세요. (예: 01012345678)');
+    return;
+  }
+
+  setAuthBtnLoading(true);
+
+  try {
+    const res = await appsScriptRequest({ action: 'auth', name, phone });
+
+    if (res.status === 'ok') {
+      state.sessionKey = res.sessionKey;
+      state.candidate  = res.candidate;
+      state.slots      = res.slots;
+      renderSchedule();
+    } else if (res.status === 'expired') {
+      hide('authSection');
+      show('expiredSection');
+    } else if (res.status === 'already_responded') {
+      renderAlreadyResponded(res);
+    } else {
+      setAuthError(res.message || COPY.authErrorNotFound);
+    }
+  } catch (e) {
+    setAuthError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+  } finally {
+    setAuthBtnLoading(false);
+  }
+}
+
+function renderAlreadyResponded(res) {
+  hide('authSection');
+  if (res.responseType === 'no_slot') {
+    show('noSlotSection');
+  } else {
+    $('completePosition').textContent = state.candidate?.position || res.position || '';
+    $('completeName').textContent     = state.candidate?.name     || res.name     || '';
+    $('completeSlot').textContent     = res.selectedSlotText || '확정 완료';
+    show('completeSection');
+  }
+}
+
+/* ---------------------------------------------------------------
+   STEP 2: 일정 선택 렌더링
+--------------------------------------------------------------- */
+function renderSchedule() {
+  const c = state.candidate;
+
+  $('infoPosition').textContent = c.position;
+  $('infoName').textContent     = c.name;
+
+  // 기한 표시
+  $('deadlineText').textContent = formatDate(c.selection_deadline);
+  if (isDeadlineUrgent(c.selection_deadline)) {
+    $('deadlineBadge').classList.add('urgent');
+  }
+
+  // 슬롯 렌더링
+  const list = $('slotsList');
+  list.innerHTML = '';
+
+  state.slots.forEach(slot => {
+    const card = document.createElement('div');
+    card.className = 'slot-card';
+    card.dataset.slotId = slot.slot_id;
+    card.innerHTML = `
+      <div class="slot-icon">📅</div>
+      <div class="slot-info">
+        <div class="slot-date">${slot.display_text || formatDate(slot.interview_date)}</div>
+        <div class="slot-time">${slot.start_time} – ${slot.end_time}</div>
+      </div>
+      <div class="slot-check">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="3">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+    `;
+    card.addEventListener('click', () => handleSlotSelect(slot.slot_id, slot.display_text || formatDate(slot.interview_date)));
+    list.appendChild(card);
+  });
+
+  hide('authSection');
+  show('scheduleSection');
+}
+
+/* ---------------------------------------------------------------
+   STEP 3: 일정 선택 처리
+--------------------------------------------------------------- */
+async function handleSlotSelect(slotId, slotText) {
+  if (state.isSubmitting) return;
+
+  // 클릭된 카드 시각적 선택
+  document.querySelectorAll('.slot-card').forEach(c => {
+    c.classList.remove('selected');
+  });
+  const card = document.querySelector(`[data-slot-id="${slotId}"]`);
+  if (card) card.classList.add('selected');
+
+  // 확인 다이얼로그 (UX)
+  const confirmed = confirm(`아래 일정으로 확정하시겠습니까?\n\n${slotText}\n\n확정 후에는 이메일로 문의해 주세요.`);
+  if (!confirmed) {
+    document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('selected'));
+    return;
+  }
+
+  state.isSubmitting = true;
+  setAllSlotsDisabled(true);
+  $('noSlotBtn').disabled = true;
+  setScheduleError('');
+
+  try {
+    const res = await appsScriptRequest({
+      action: 'select',
+      sessionKey: state.sessionKey,
+      slotId,
+    });
+
+    if (res.status === 'ok') {
+      const c = state.candidate;
+      $('completePosition').textContent = c.position;
+      $('completeName').textContent     = c.name;
+      $('completeSlot').textContent     = slotText + `  ${state.slots.find(s=>s.slot_id===slotId)?.start_time||''} – ${state.slots.find(s=>s.slot_id===slotId)?.end_time||''}`;
+      hide('scheduleSection');
+      show('completeSection');
+    } else if (res.status === 'expired') {
+      hide('scheduleSection');
+      show('expiredSection');
+    } else {
+      setScheduleError(res.message || '오류가 발생했습니다. 다시 시도해 주세요.');
+      setAllSlotsDisabled(false);
+      $('noSlotBtn').disabled = false;
+      document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('selected'));
+    }
+  } catch (e) {
+    setScheduleError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    setAllSlotsDisabled(false);
+    $('noSlotBtn').disabled = false;
+  } finally {
+    state.isSubmitting = false;
+  }
+}
+
+/* ---------------------------------------------------------------
+   가능한 일정 없음 처리
+--------------------------------------------------------------- */
+async function handleNoSlot() {
+  if (state.isSubmitting) return;
+
+  const confirmed = confirm('가능한 일정이 없다고 전달하시겠습니까?\n담당자가 확인 후 연락드릴 예정입니다.');
+  if (!confirmed) return;
+
+  state.isSubmitting = true;
+  $('noSlotBtn').disabled = true;
+  setAllSlotsDisabled(true);
+  setScheduleError('');
+
+  try {
+    const res = await appsScriptRequest({
+      action: 'no_slot',
+      sessionKey: state.sessionKey,
+    });
+
+    if (res.status === 'ok') {
+      hide('scheduleSection');
+      show('noSlotSection');
+    } else if (res.status === 'expired') {
+      hide('scheduleSection');
+      show('expiredSection');
+    } else {
+      setScheduleError(res.message || '오류가 발생했습니다. 다시 시도해 주세요.');
+      $('noSlotBtn').disabled = false;
+      setAllSlotsDisabled(false);
+    }
+  } catch (e) {
+    setScheduleError('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    $('noSlotBtn').disabled = false;
+    setAllSlotsDisabled(false);
+  } finally {
+    state.isSubmitting = false;
+  }
+}
+
+function setAllSlotsDisabled(disabled) {
+  document.querySelectorAll('.slot-card').forEach(c => {
+    if (disabled) c.classList.add('disabled');
+    else c.classList.remove('disabled');
+  });
+}
+
+/* ---------------------------------------------------------------
+   Apps Script API 통신
+   JSONP 방식 사용 (CORS 우회)
+--------------------------------------------------------------- */
+function appsScriptRequest(payload) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const params = new URLSearchParams({
+      callback: callbackName,
+      payload: JSON.stringify(payload),
+    });
+    const url = CONFIG.APPS_SCRIPT_URL + '?' + params.toString();
+
+    const script = document.createElement('script');
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      reject(new Error('Request timeout'));
+    }, 15000);
+
+    window[callbackName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    function cleanup() {
+      clearTimeout(timeoutId);
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    script.onerror = () => { cleanup(); reject(new Error('Script load error')); };
+    script.src = url;
+    document.head.appendChild(script);
+  });
+}
+</script>
+
+</body>
+</html>
